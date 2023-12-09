@@ -39,7 +39,7 @@ def get_UCB_LCB_avg(curr_pat_df, Y_upper, Y_lower):
         if not label in (0, 1):
             raise Exception('@@@@Labels must satisfy label == 0 or label == 1.')
     LCB, UCB = standardize_reward(hours2sepsis,Y_upper, Y_lower)
-    print(F'[LCB, UCB]]: [{LCB},{UCB}]')
+    print(F'[LCB, UCB]: [{LCB},{UCB}]')
  
     return UCB, LCB
  

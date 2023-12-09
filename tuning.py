@@ -78,6 +78,15 @@ def tuning(X, y, model_name):
             'C': [0.1, 1, 10],
             'gamma': [0.1, 1, 10]}
         model = SVR()
+    elif model_name == 'rf':
+        params = {
+            'n_estimators': [100, 200, 300],
+            'max_features': ['auto', 'sqrt'],
+            'max_depth': [10, 20, 30, None],
+            'min_samples_split': [2, 5, 10],
+            'min_samples_leaf': [1, 2, 4]
+        }    
+        model = RandomForestRegressor()
     elif model_name == 'ridge':
         min_alpha = 0.0001
         max_alpha = 10
@@ -102,8 +111,18 @@ def tuning(X, y, model_name):
         best_alpha = model.alpha_
         best_score = model.best_score_
     else:
-        search = GridSearchCV(estimator=model, param_grid=params, cv=5, n_jobs=-1, verbose=2, scoring='neg_mean_squared_error')
+        # if model_name == 'svr':
+        search = RandomizedSearchCV(estimator=model, param_distributions=params, n_iter=100, cv=5, n_jobs=-1, verbose=2, scoring='neg_mean_squared_error')
+            # search.fit(X, y)
+            # best_params = search.best_params_
+            # best_s`core = search.best_score_
+        # else:
+            # search = GridSearchCV(estimator=model, param_grid=params, cv=5, n_jobs=-1, verbose=2, scoring='neg_mean_squared_error')
         search.fit(X, y)
+        # if model_name == 'rf' or model_name == 'svr':
+        best_params = search.best_params_
+        best_model = search.best_estimator_
+            # else:
         best_params = search.best_params_
         best_score = search.best_score_
     end_time = time.time()
@@ -114,11 +133,17 @@ def tuning(X, y, model_name):
     print('Model Name:', model_name)
     if model_name == 'ridge' or model_name == 'lasso': 
         print("Best Alpha:", best_alpha)
+        print("Best Score:", best_score)
         results_df = pd.DataFrame(model.cv_results_)
+    # elif model_name == 'rf':
     else:
         print("Best Parameters:", best_params)
+        print("Best rf model", best_model)
+    # else:
+        print("Best Parameters:", best_params)
+        print("Best Score:", best_score)
         results_df = pd.DataFrame(search.cv_results_)
-    print("Best Score:", best_score)
+    
     print("Execution Time:", execution_time, "seconds")
 
     
@@ -135,11 +160,11 @@ if __name__ == '__main__':
     start_sepsis_train = 0
     # test_set = np.load('./Data/test_set.npy')
     # test_set =  test_set[start_test:start_test+num_test_pat]
-    train_sepsis = np.load('./Data/train_sepsis.npy')
-    train_nosepsis = np.load('./Data/train_nosepsis.npy')
+    train_sepsis = np.load('../cpbanditsepsis_experiements/Data/train_sepsis.npy')
+    train_nosepsis = np.load('../cpbanditsepsis_experiements/Data/train_nosepsis.npy')
     train_sepsis = train_sepsis[start_sepsis_train:start_sepsis_train+num_train_sepsis_pat]
     train_nosepsis = train_nosepsis[start_nosepsis_train:start_nosepsis_train+num_train_nosepsis_pat]
-    sepsis_full = pd.read_csv('./Data/fully_imputed.csv')
+    sepsis_full = pd.read_csv('../cpbanditsepsis_experiements/Data/fully_imputed.csv')
     sepsis_full.drop(['HospAdmTime'], axis=1, inplace=True)
     train_sepis_df = sepsis_full[sepsis_full['pat_id'].isin(train_sepsis)]
     train_nosepis_df = sepsis_full[sepsis_full['pat_id'].isin(train_nosepsis)]
@@ -154,5 +179,6 @@ if __name__ == '__main__':
     X_train = train_set_df_x.to_numpy(dtype='float', na_value=np.nan)
     Y_train = train_set_df_y.to_numpy(dtype='float', na_value=np.nan)
 
-    for expert in [ 'xgb','svr']:
+    # for expert in ['svr']:
+    for expert in ['rf']:
         tuning(X_train, Y_train, expert)

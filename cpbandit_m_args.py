@@ -222,6 +222,8 @@ I
         if 'lasso' in self.experts:
             lasso_f = LassoCV(alphas=np.linspace(min_alpha, max_alpha, 10))
         if 'rf' in self.experts:
+            rf_hyperparams = {'n_estimators':10, 'criterion':'mse','bootstrap': False, 'max_depth': 2}
+
             rf_f = RandomForestRegressor(n_estimators=10, criterion='mse', bootstrap=False, max_depth=2, n_jobs=-1)
         # if 'svr' in self.experts:
         #     svr_f = SVR()
@@ -420,6 +422,8 @@ I
             file.write(f'Machine: {machine}\n')
             file.write(f'Multiprocessor: True\n')
             file.write(f'xgb hyperparameters: {xgb_hyperparams}\n')
+            file.write(f'rf hyperparameters: {rf_hyperparams}\n')
+             
         print(f'The models have been fitted for {num_fitting} times.')
         print('========================================================')
 
