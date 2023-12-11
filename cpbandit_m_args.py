@@ -421,8 +421,10 @@ I
             file.write(f'The models have been fitted for {num_fitting} times.\n')
             file.write(f'Machine: {machine}\n')
             file.write(f'Multiprocessor: True\n')
-            file.write(f'xgb hyperparameters: {xgb_hyperparams}\n')
-            file.write(f'rf hyperparameters: {rf_hyperparams}\n')
+            if 'xgb' in self.experts:
+                file.write(f'xgb hyperparameters: {xgb_hyperparams}\n')
+            if 'rf' in self.experts:
+                file.write(f'rf hyperparameters: {rf_hyperparams}\n')
              
         print(f'The models have been fitted for {num_fitting} times.')
         print('========================================================')
