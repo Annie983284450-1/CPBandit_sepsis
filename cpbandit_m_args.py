@@ -222,9 +222,10 @@ I
         if 'lasso' in self.experts:
             lasso_f = LassoCV(alphas=np.linspace(min_alpha, max_alpha, 10))
         if 'rf' in self.experts:
-            rf_hyperparams = {'n_estimators':10, 'criterion':'mse','bootstrap': False, 'max_depth': 2}
+            rf_hyperparams = {'n_estimators': 100, 'min_samples_split': 2, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 10}
+            # rf_hyperparams = {'n_estimators':10, 'criterion':'mse','bootstrap': False, 'max_depth': 2}
 
-            rf_f = RandomForestRegressor(n_estimators=10, criterion='mse', bootstrap=False, max_depth=2, n_jobs=-1)
+            rf_f = RandomForestRegressor(n_estimators=100, min_samples_split = 2, min_samples_leaf = 4, criterion='mse',  max_features = 'sqrt' , max_depth=10, n_jobs=-1)
         # if 'svr' in self.experts:
         #     svr_f = SVR()
         if 'xgb' in self.experts:
