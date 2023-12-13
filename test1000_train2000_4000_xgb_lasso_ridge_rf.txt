@@ -1,0 +1,14 @@
+nohup: ignoring input
+2023-12-13 17:54:41.270246: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.11.0
+No display found. Using non-interactive Agg backend
+Switched to: agg
+No display found. Using non-interactive Agg backend
+expert dict: {'xgb': 0, 'lasso': 1, 'ridge': 2, 'rf': 3}
+final columns: ['patient_id', 'alpha', 'itrial', 'method', 'xgb_interval', 'lasso_interval', 'ridge_interval', 'rf_interval', 'xgb_coverage', 'lasso_coverage', 'ridge_coverage', 'rf_coverage', 'xgb_regret', 'lasso_regret', 'ridge_regret', 'rf_regret', 'winner']
+predictions_col: ['pat_id', 'itrial', 'hours2sepsis', 'xgb_predictions', 'lasso_predictions', 'ridge_predictions', 'rf_predictions']
+cp_col: ['patient_id', 'alpha', 'itrial', 'method', 'UCB_xgb', 'UCB_lasso', 'UCB_ridge', 'UCB_rf', 'LCB_xgb', 'LCB_lasso', 'LCB_ridge', 'LCB_rf', 'xgb_predictions', 'lasso_predictions', 'ridge_predictions', 'rf_predictions', 'upper_xgb', 'upper_lasso', 'upper_ridge', 'upper_rf', 'lower_xgb', 'lower_lasso', 'lower_ridge', 'lower_rf', 'winner', 'pulled_idx']
+
+
+
+=======Processing patient 0th patient: p106715====================
+        !!!!!Refitting xgb!!!!!

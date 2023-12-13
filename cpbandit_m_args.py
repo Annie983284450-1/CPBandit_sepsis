@@ -92,9 +92,9 @@ I
         the time complexity is too high. So we need to do the refitting less frequently
         '''
         # read sepsis dataset
-        num_test_pat = 500
-        num_train_sepsis_pat = 1000
-        num_train_nosepsis_pat = 3000
+        num_test_pat = 1000
+        num_train_sepsis_pat = 2000
+        num_train_nosepsis_pat = 4000
 
         start_test = 0
         start_nosepsis_train = 0
@@ -346,7 +346,9 @@ I
                         print(f'Selecting the best expert on average @@@@~~~')
                         pulled_arm_idx_avg = gap_bandit(self.UCB_avg, self.LCB_avg, self.k).pull_arm()
                         for expert in self.experts:
-                            regret_dict[f'{expert}'] = 1 - standardize_rmse_dict[f'{expert}']
+                            #the larger the standardized_rmse, the larger the regret
+                            # regret_dict[f'{expert}'] = 1 - standardize_rmse_dict[f'{expert}']
+                            regret_dict[f'{expert}'] = standardize_rmse_dict[f'{expert}']
                             new_row_all_avg[f'{expert}_interval'] = (LCB_dict[expert], UCB_dict[expert])
                             new_row_all_avg[f'{expert}_coverage'] = coverage_dict[expert]
                             new_row_all_avg[f'{expert}_regret'] = regret_dict[expert]
