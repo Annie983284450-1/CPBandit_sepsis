@@ -1,7 +1,7 @@
 import importlib
 import pickle
 import warnings
-import utils_EnbPI_journal as util
+import utils_Sepsysolcp as util
 import time as time
 import math
 import matplotlib.pyplot as plt
@@ -12,11 +12,7 @@ from sklearn.linear_model import LogisticRegression
 import numpy as np
 import pandas as pd
 import os
-# import keras
 import tensorflow.keras as keras
-# from keras.models import Sequential, clone_model
-# from keras.layers import Dense
-# from keras.layers import Dropout
 from tensorflow.keras.models import Sequential, clone_model
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Dropout
@@ -105,8 +101,6 @@ class prediction_interval():
     def fit_bootstrap_models_online_single(self, args):
         b, boot_samples_idx_b, model_name, n, n1, Isrefit, saved_model_path = args  
         saved_model_path = self.final_result_path+'/saved_models/'+ model_name
-
-        # logic for fitting a single bootstrap model ...
         # print(f'        !!!!!Refitting {model_name}!!!!!')
         model = self.regressor
         boot_predictions_b = np.zeros((1, (n+n1)), dtype=float)
@@ -134,6 +128,8 @@ class prediction_interval():
             with open(saved_model_file_name, 'rb') as f:
                 model = pickle.load(f)       
         boot_predictions_b = model.predict(np.r_[self.X_train, self.X_predict]).flatten() # to one dimension
+        boot_predictions_b = np.clip(boot_predictions_b, 0, 500)
+
 
 
         # IndexError: index 3861 is out of bounds for axis 0 with size 1
@@ -146,7 +142,8 @@ class prediction_interval():
             "in_boot_sample": in_boot_sample_b,
             # "saved_model_file_name": saved_model_file_name
         }
-    def train_sequential_m_gpus(self, B, Isrefit, model_name,boot_samples_idx, saved_model_path):
+    # ???
+    def train_sequential_m_gpus(self, B, Isrefit, model_name, boot_samples_idx, saved_model_path, miss_test_idx):
         strategy = tf.distribute.MirroredStrategy()
         with strategy.scope():
             distributed_model = clone_model(self.regressor)
@@ -154,6 +151,7 @@ class prediction_interval():
 
     def aggregation_bkeep(self,n, n1, i, in_boot_sample, boot_predictions):
         b_keep = np.argwhere(~(in_boot_sample[:, i])).reshape(-1) # the idexes of bootstrap that are used to calculate the mu_hat_-i
+        
         if len(b_keep)>0:
             ensemble_train_interval_center = boot_predictions[b_keep, i].mean() 
             resid_LOO = self.Y_train[i] - ensemble_train_interval_center
@@ -193,15 +191,16 @@ class prediction_interval():
         if Isrefit:
             print(f'        !!!!!Refitting {model_name}!!!!!')
             boot_samples_idx = util.generate_bootstrap_samples(n, n, B) 
-            # np.save() will overwrite the original file
+            # overwrite the original 'boot_samples_idx.npy'
             np.save(os.path.join(saved_model_path,'boot_samples_idx.npy'), boot_samples_idx)
+            
         else:
             print(f'        No refitting, use saved {model_name} models!!!')
             boot_samples_idx = np.load(os.path.join(saved_model_path,'boot_samples_idx.npy'))   
+            print(f'Predicting hours to sepsis ........')
         # print(f'        Calculating the residuals......')
+        
         start = time.time()
-         
-
         if self.regressor.__class__.__name__ == 'Sequential':
             # boot_predictions, in_boot_sample = self.fit_bootstrap_sequential_online_single(Isrefit, B, n, n1, boot_samples_idx, saved_model_path)
             self.fit_bootstrap_sequential_online_single(Isrefit, B, n, n1, boot_samples_idx, saved_model_path)
@@ -224,9 +223,9 @@ class prediction_interval():
 
         start = time.time()
         keep = []
-        ## the aggregation method of reusing the mu_hat that have been got in the B bootstrap training above
+        ## the aggregation method of reusing the hat_f_b that have been got in the B bootstrap training above
         # num_null_bkeep=0
-        print("boot_preictions is pickleable:", util.is_picklable(boot_predictions))
+        # print("boot_preictions pickleable?:", util.is_picklable(boot_predictions))
         num_null_bkeep, out_sample_predict = self.aggregation_bkeep_parallel(n, n1, in_boot_sample, boot_predictions)
 
         print(f'###Max LOO training residual is {np.max(self.Ensemble_online_resid)}')
@@ -652,7 +651,7 @@ class prediction_interval():
         # print(time.time()-start)
         return PIs_ICP
 
-    def compute_PIs_tseries_online(self, alpha, name):
+    
         '''
             Use train_size to form model and the rest to be out-sample-prediction
         '''

@@ -19,8 +19,8 @@ from numpy.random import choice
 from scipy.stats import norm
 from scipy.sparse import random
 import warnings
-# import PI_class_EnbPI_journal as EnbPI  # For me
-import PI_class_EnbPI_multi as EnbPI  
+ 
+import PI_Sepsysolcp as EnbPI  
 import matplotlib.cm as cm
 import time
 from tensorflow.keras.layers import LSTM, Dense, Dropout
@@ -30,10 +30,7 @@ import calendar
 import matplotlib.transforms as transforms
 import importlib
 import sys
-# importlib.reload(sys.modules['PI_class_EnbPI_multi'])  # For me
-# '''Simulation Section '''
-# '''Define True Models and Errors '''
-
+ 
 def is_picklable(obj):
     try:
         pickle.dump(obj)
@@ -476,23 +473,7 @@ def read_data(i, filename, max_data_size):
 # Extra real-data for CA and Wind
 
 
-def read_CA_data(filename):
-    data = pd.read_csv(filename)
-    # data.shape  # 8760, 14
-    data.drop(columns=data.columns[0:6], inplace=True)
-    return data
-
-
-def read_wind_data():
-    ''' Note, just use the 8760 hourly observation in 2019
-    Github repo is here: https://github.com/Duvey314/austin-green-energy-predictor'''
-    data_wind_19 = pd.read_csv('Data/Wind_Hackberry_Generation_2019_2020.csv')
-    data_wind_19 = data_wind_19.iloc[:24 * 365, :]
-    return data_wind_19
-
-
-'''Binning Subroutine (used everywhere)'''
-
+ 
 
 def binning(past_resid, alpha):
     '''
@@ -518,15 +499,7 @@ def binning(past_resid, alpha):
 
 '''Helper for Multi-step ahead inference'''
 
-
-def missing_data(data, missing_frac, update=False):
-    n = len(data)
-    idx = np.random.choice(n, size=math.ceil(missing_frac * n), replace=False)
-    if update:
-        data = np.delete(data, idx, 0)
-    idx = idx.tolist()
-    return (data, idx)
-
+ 
 
 '''
 Neural Networks Regressors 
@@ -591,26 +564,7 @@ def generate_bootstrap_samples(n, m, B):
         samples_idx[b, :] = sample_idx
     return(samples_idx)
 
-# def generate_bootstrap_samples_controlled(n, m, B):
-#     '''
-#       Return: B-by-m matrix, where row b gives the indices for b-th bootstrap sample
-#     '''
-#     samples_idx = np.zeros((B, m), dtype=int)
-    
-#     exclude_step = math.ceil(B/n)
-#     exclude_start = 0
-#     exclude_end = exclude_step 
-#     for b in range(B):
-#         exclude_idxs = list(range(exclude_start, exclude_end))
-#         # sample_idx = np.random.choice(n, m)
-#         # allowed for repeated items
-#         allowed = np.array([x for x in range(n) if x not in exclude_idxs])
-#         sample_idx = np.random.choice(allowed, size = m, replace=True)
-#         samples_idx[b, :] = sample_idx
-#         exclude_start = exclude_start + exclude_step
-#         exclude_end =  min(n, exclude_end + exclude_step)
-#     return(samples_idx)
-
+ 
 def one_dimen_transform(Y_train, Y_predict, d):
     n = len(Y_train)
     n1 = len(Y_predict)
